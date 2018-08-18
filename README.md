@@ -1,3 +1,14 @@
-mafengwo tactic spider for Ocean Zhang
+mafengwo tactic spider 
+======================
 
-======================================
++ DONE
+  
+  + LINKs SIPDER
+  
++ TODO
+  
+  + PANIC
+  
+  + Content SPIDER
+  
+  + PACKUP

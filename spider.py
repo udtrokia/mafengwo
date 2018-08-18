@@ -10,6 +10,7 @@
 # modules
 import os;
 import re;
+import time;
 import json;
 import requests as r;
 
@@ -48,11 +49,20 @@ chrome_options.add_argument('--disable-gpu');
 driver = webdriver.Chrome(chrome_options=chrome_options);
 actions = ActionChains(driver);
 
+# !!!!__IMPORTANT__!!!! #
+def end():
+    os.remove('data'); # Production should delete
+    driver.quit();
+    db.close();
+    quit();
+
+
 # Page
 class Page:
     def __init__(self):
         self.api = 'https://www.mafengwo.cn';
         self.page = 1;
+        self.end = None;
 
     def get_link(self):
         driver.get(self.api);
@@ -63,23 +73,51 @@ class Page:
             try:
                 islink = re.compile('https://www.mafengwo.cn/i/\S*').search(str(href));
                 Links.create(page = self.page, link = islink[0]);
-            except: continue;
-                        
+            except:
+                self.end = True;
+                continue;
+
     def next_page(self):
+        try:
+            button = driver.find_element_by_xpath("//a[@class='pg-next _j_pageitem']");
+            actions.move_to_element(button);
+            actions.click(button);
+            actions.perform();
+            while(True):
+                time.sleep(2);
+
+                label = driver.find_element_by_xpath("//a[@class='pg-next _j_pageitem']");
+                data = label.get_attribute('data-page');
+                if (int(data) == self.page + 2) :
+                    self.page += 1;
+                    break;
+
+        except:
+            print('panic...')
+            end();
         
-        print(dir(driver))
 
 
+def start():
+    pointer = Page();
+    while(True):
+        p.get_link();
+        p.next_page();
 
+        if (p.end == True):
+            break;
+            
+            
 # TEST
-p = Page();
-p.next_page();
+def test():
+    p = Page();
+    p.get_link();
+    p.next_page();
+
 
 ## l = Links.select().where(Links.page == 1)
 ## for foo in l:
 ##     print(foo.link)
+test();
+end();
 
-
-# !!!!__IMPORTANT__!!!! #
-driver.quit();
-db.close();
